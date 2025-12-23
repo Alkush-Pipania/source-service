@@ -1,0 +1,39 @@
+package links
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/Alkush-Pipania/carter-go/internal/modules" // Assuming you have the shared struct here
+	"github.com/go-shiori/go-readability"
+)
+
+type LinkProcessor struct{}
+
+func NewLinkProcessor() *LinkProcessor {
+	return &LinkProcessor{}
+}
+
+// Process visits the URL and extracts the main article text
+func (l *LinkProcessor) Process(ctx context.Context, job modules.SourceJob) (*modules.ProcessedContent, error) {
+	if job.OriginalURL == "" {
+		return nil, fmt.Errorf("original URL is missing")
+	}
+
+	// 1. Scrape with 30s timeout
+	article, err := readability.FromURL(job.OriginalURL, 30*time.Second)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scrape url: %w", err)
+	}
+
+	// 2. Return clean text
+	return &modules.ProcessedContent{
+		Title: article.Title,
+		Text:  article.TextContent,
+		Metadata: map[string]interface{}{
+			"original_url": job.OriginalURL,
+			"site_name":    article.SiteName,
+		},
+	}, nil
+}
