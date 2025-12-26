@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Alkush-Pipania/carter-go/internal/modules" // Assuming you have the shared struct here
+	"github.com/Alkush-Pipania/source-service/internal/modules"
 	"github.com/go-shiori/go-readability"
 )
 
