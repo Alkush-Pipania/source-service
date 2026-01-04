@@ -15,7 +15,6 @@ import (
 )
 
 const (
-	// Key prefix for storing link images in S3
 	ImageKeyPrefix = "links"
 )
 
@@ -71,12 +70,6 @@ func (s *Service) ProcessLink(ctx context.Context, job modules.SourceJob) error 
 	if err := s.repo.UpdateTitleAndImage(ctx, sourceUUID, content.Title, imageS3URL); err != nil {
 		log.Printf("Warning: Failed to update title/image: %v", err)
 	}
-
-	// 4. Save raw text to DB (Skipped as per user request to remove source content)
-	// if err := s.repo.SaveContent(ctx, sourceUUID, content.Text); err != nil {
-	// 	_ = s.repo.UpdateStatus(ctx, sourceUUID, db.SourceStatusFailed)
-	// 	return err
-	// }
 
 	// 5. Chunking (1000 chars per chunk, 200 overlap)
 	chunks := utils.SplitText(content.Text, 1000, 200)

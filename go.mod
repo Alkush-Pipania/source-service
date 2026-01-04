@@ -11,6 +11,7 @@ require (
 	github.com/go-shiori/go-readability v0.0.0-20251205110129-5db1dc9836f0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/joho/godotenv v1.5.1
+	github.com/otiai10/opengraph/v2 v2.2.0
 	github.com/pinecone-io/go-pinecone/v4 v4.1.4
 	github.com/rabbitmq/amqp091-go v1.10.0
 	google.golang.org/genai v1.40.0
