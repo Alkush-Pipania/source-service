@@ -3,27 +3,31 @@ package gemini
 import (
 	"context"
 	"fmt"
+	"os"
 
-	"github.com/google/generative-ai-go/genai"
-	"google.golang.org/api/option"
+	"google.golang.org/genai"
 )
 
+const EmbeddingModel = "gemini-embedding-001"
+
+var outputDimensionality int32 = 768
+
 type Client struct {
-	emModel *genai.EmbeddingModel
-	client  *genai.Client
+	client *genai.Client
 }
 
 func NewClient(ctx context.Context, apiKey string) (*Client, error) {
-	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
-	if err != nil {
-		return nil, err
+	if apiKey != "" {
+		os.Setenv("GOOGLE_API_KEY", apiKey)
 	}
 
-	// 'text-embedding-004' is the latest, or use 'embedding-001'
-	emModel := client.EmbeddingModel("text-embedding-004")
+	client, err := genai.NewClient(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create genai client: %w", err)
+	}
+
 	return &Client{
-		client:  client,
-		emModel: emModel,
+		client: client,
 	}, nil
 }
 
@@ -32,18 +36,22 @@ func (c *Client) GenerateEmbedding(ctx context.Context, text string) ([]float32,
 		return nil, fmt.Errorf("text cannot be empty")
 	}
 
-	res, err := c.emModel.EmbedContent(ctx, genai.Text(text))
+	contents := []*genai.Content{
+		genai.NewContentFromText(text, genai.RoleUser),
+	}
+
+	result, err := c.client.Models.EmbedContent(ctx,
+		EmbeddingModel,
+		contents,
+		&genai.EmbedContentConfig{OutputDimensionality: &outputDimensionality},
+	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to embed content: %w", err)
 	}
 
-	if res.Embedding == nil {
-		return nil, fmt.Errorf("failed to generate embedding")
+	if len(result.Embeddings) == 0 {
+		return nil, fmt.Errorf("no embeddings returned")
 	}
 
-	return res.Embedding.Values, nil
-}
-
-func (c *Client) Close() {
-	c.client.Close()
+	return result.Embeddings[0].Values, nil
 }

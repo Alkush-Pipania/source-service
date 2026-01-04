@@ -31,18 +31,18 @@ func (s *Service) ProcessDoc(ctx context.Context, job modules.SourceJob) error {
 	}
 
 	// 1. Download & Parse
-	content, err := s.processor.Process(ctx, job)
+	_, err := s.processor.Process(ctx, job)
 	if err != nil {
 		log.Printf("Doc processing failed: %v", err)
 		_ = s.repo.UpdateStatus(ctx, sourceUUID, db.SourceStatusFailed)
 		return err
 	}
 
-	// 2. Save Content
-	if err := s.repo.SaveContent(ctx, sourceUUID, content.Text); err != nil {
-		_ = s.repo.UpdateStatus(ctx, sourceUUID, db.SourceStatusFailed)
-		return err
-	}
+	// 2. Save Content (Skipped as per user request to remove source content)
+	// if err := s.repo.SaveContent(ctx, sourceUUID, content.Text); err != nil {
+	// 	_ = s.repo.UpdateStatus(ctx, sourceUUID, db.SourceStatusFailed)
+	// 	return err
+	// }
 
 	// 3. Mark as Indexed (Queue for embedding in future)
 	if err := s.repo.UpdateStatus(ctx, sourceUUID, db.SourceStatusIndexed); err != nil {

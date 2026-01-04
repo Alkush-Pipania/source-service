@@ -3,8 +3,7 @@ package rabbitmq
 import "github.com/rabbitmq/amqp091-go"
 
 type RabbitClient struct {
-	Conn    *amqp091.Connection
-	Channel *amqp091.Channel
+	Conn *amqp091.Connection
 }
 
 func NewRabbitClient(url string) (*RabbitClient, error) {
@@ -12,22 +11,14 @@ func NewRabbitClient(url string) (*RabbitClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	ch, err := conn.Channel()
-	if err != nil {
-		return nil, err
-	}
 	return &RabbitClient{
-		Conn:    conn,
-		Channel: ch,
+		Conn: conn,
 	}, nil
 }
 
 func (rc *RabbitClient) Close() error {
 	if rc.Conn != nil {
 		return rc.Conn.Close()
-	}
-	if rc.Channel != nil {
-		return rc.Channel.Close()
 	}
 	return nil
 }

@@ -11,6 +11,32 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getSourceByID = `-- name: GetSourceByID :one
+SELECT id, user_id, collection_id, type, status, title, original_url, s3_bucket, s3_key, content_hash, created_at, image_url
+FROM sources
+WHERE id = $1
+`
+
+func (q *Queries) GetSourceByID(ctx context.Context, id pgtype.UUID) (Source, error) {
+	row := q.db.QueryRow(ctx, getSourceByID, id)
+	var i Source
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.CollectionID,
+		&i.Type,
+		&i.Status,
+		&i.Title,
+		&i.OriginalUrl,
+		&i.S3Bucket,
+		&i.S3Key,
+		&i.ContentHash,
+		&i.CreatedAt,
+		&i.ImageUrl,
+	)
+	return i, err
+}
+
 const updateSourceStatus = `-- name: UpdateSourceStatus :exec
 UPDATE sources 
 SET status = $2
@@ -24,5 +50,22 @@ type UpdateSourceStatusParams struct {
 
 func (q *Queries) UpdateSourceStatus(ctx context.Context, arg UpdateSourceStatusParams) error {
 	_, err := q.db.Exec(ctx, updateSourceStatus, arg.ID, arg.Status)
+	return err
+}
+
+const updateSourceTitleAndImage = `-- name: UpdateSourceTitleAndImage :exec
+UPDATE sources 
+SET title = $2, image_url = $3
+WHERE id = $1
+`
+
+type UpdateSourceTitleAndImageParams struct {
+	ID       pgtype.UUID
+	Title    string
+	ImageUrl pgtype.Text
+}
+
+func (q *Queries) UpdateSourceTitleAndImage(ctx context.Context, arg UpdateSourceTitleAndImageParams) error {
+	_, err := q.db.Exec(ctx, updateSourceTitleAndImage, arg.ID, arg.Title, arg.ImageUrl)
 	return err
 }
