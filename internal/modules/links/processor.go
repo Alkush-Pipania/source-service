@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Alkush-Pipania/carter-go/internal/modules" // Assuming you have the shared struct here
+	"github.com/Alkush-Pipania/source-service/internal/modules"
 	"github.com/go-shiori/go-readability"
 )
 
@@ -15,7 +15,7 @@ func NewLinkProcessor() *LinkProcessor {
 	return &LinkProcessor{}
 }
 
-// Process visits the URL and extracts the main article text
+// Process visits the URL and extracts the main article text and image
 func (l *LinkProcessor) Process(ctx context.Context, job modules.SourceJob) (*modules.ProcessedContent, error) {
 	if job.OriginalURL == "" {
 		return nil, fmt.Errorf("original URL is missing")
@@ -27,13 +27,15 @@ func (l *LinkProcessor) Process(ctx context.Context, job modules.SourceJob) (*mo
 		return nil, fmt.Errorf("failed to scrape url: %w", err)
 	}
 
-	// 2. Return clean text
+	// 2. Return clean text with image URL
 	return &modules.ProcessedContent{
 		Title: article.Title,
 		Text:  article.TextContent,
 		Metadata: map[string]interface{}{
 			"original_url": job.OriginalURL,
 			"site_name":    article.SiteName,
+			"image_url":    article.Image, // Featured image from the page
+			"favicon":      article.Favicon,
 		},
 	}, nil
 }

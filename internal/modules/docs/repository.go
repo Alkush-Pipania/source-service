@@ -3,7 +3,7 @@ package docs
 import (
 	"context"
 
-	"github.com/Alkush-Pipania/carter-go/pkg/db"
+	"github.com/Alkush-Pipania/source-service/pkg/db"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 

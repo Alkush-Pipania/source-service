@@ -72,9 +72,9 @@ func (s *Service) ProcessNote(ctx context.Context, job modules.SourceJob) error 
 		})
 	}
 
-	// 4. Upsert to Pinecone
+	// 4. Upsert to Pinecone with userID as namespace
 	if len(vectors) > 0 {
-		if err := s.pinecone.Upsert(ctx, vectors); err != nil {
+		if _, err := s.pinecone.UpsertWithNamespace(ctx, job.UserID, vectors); err != nil {
 			log.Printf("Failed to upsert note vectors: %v", err)
 			_ = s.repo.UpdateStatus(ctx, sourceUUID, db.SourceStatusFailed)
 			return err

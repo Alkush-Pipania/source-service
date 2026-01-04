@@ -10,6 +10,7 @@ import (
 type Repository interface {
 	SaveContent(ctx context.Context, sourceID pgtype.UUID, content string) error
 	UpdateStatus(ctx context.Context, sourceID pgtype.UUID, status db.SourceStatus) error
+	UpdateTitleAndImage(ctx context.Context, sourceID pgtype.UUID, title string, imageURL string) error
 }
 
 type repository struct {
@@ -31,5 +32,13 @@ func (r *repository) UpdateStatus(ctx context.Context, sourceID pgtype.UUID, sta
 	return r.q.UpdateSourceStatus(ctx, db.UpdateSourceStatusParams{
 		ID:     sourceID,
 		Status: status,
+	})
+}
+
+func (r *repository) UpdateTitleAndImage(ctx context.Context, sourceID pgtype.UUID, title string, imageURL string) error {
+	return r.q.UpdateSourceTitleAndImage(ctx, db.UpdateSourceTitleAndImageParams{
+		ID:       sourceID,
+		Title:    title,
+		ImageUrl: pgtype.Text{String: imageURL, Valid: imageURL != ""},
 	})
 }
